@@ -11,9 +11,74 @@ Implementar la clase LinkedList, definiendo los siguientes métodos:
   En caso de que la búsqueda no arroje resultados, search debe retornar null.
 */
 
-function LinkedList() {}
+function LinkedList() {
+  this.head = null;
+  this._length = 0;
 
-function Node(value) {}
+  this.add = function (el) {
+    var node = new Node(el);
+    var current = this.head;
+    if (!current) {
+      this.head = node;
+      this._length++;
+      return node;
+    }
+    while (current.next) {
+      current = current.next;
+    }
+    current.next = node;
+    this._length++;
+    return node;
+  };
+
+  this.remove = function () {
+    var current = this.head;
+    var removed;
+    if (this._length === 0) {
+      return null;
+    } else if (this._length === 1) {
+      removed = current.value;
+      this.head = null;
+      this._length--;
+      return removed;
+    }
+
+    while (current.next.next) {
+      current = current.next;
+    }
+    removed = current.next.value;
+    current.next = null;
+    this._length--;
+    return removed;
+  };
+
+  this.search = function (el) {
+    var current = this.head;
+    var boolean = null;
+    var arrValues;
+    while (current && !boolean) {
+      if (el == current.value) {
+        return current.value;
+      } else if (typeof el == "function") {
+        el(current.value) ? (boolean = current.value) : null;
+      } else if (typeof current.value == "function") {
+        current.value(el) ? (boolean = current.value) : null;
+      } else if (typeof current.value == "object") {
+        arrValues = Object.values(current.value);
+        arrValues.some((act) => act == el)
+          ? (boolean = arrValues.find((act) => act == el))
+          : arrValues.some((act) => typeof act == "object");
+      }
+      current = current.next;
+    }
+    return boolean;
+  };
+}
+
+function Node(value) {
+  this.value = value;
+  this.next = null;
+}
 
 /*
 Implementar la clase HashTable.
@@ -30,7 +95,38 @@ La clase debe tener los siguientes métodos:
 Ejemplo: supongamos que quiero guardar {instructora: 'Ani'} en la tabla. Primero puedo chequear, con hasKey, si ya hay algo en la tabla con el nombre 'instructora'; luego, invocando set('instructora', 'Ani'), se almacenará el par clave-valor en un bucket específico (determinado al hashear la clave)
 */
 
-function HashTable() {}
+function HashTable() {
+  this.numBuckets = 35;
+  this.buckets = [];
+}
+
+HashTable.prototype.hash = function (key) {
+  let count = 0;
+  for (let i = 0; i < key.length; i++) {
+    count += key.charCodeAt(i);
+  }
+  return count % this.numBuckets;
+};
+
+HashTable.prototype.set = function (key, value) {
+  var index = this.hash(key);
+  if (typeof key !== "string") throw new TypeError("La key debe ser un string");
+  if (this.buckets[index] === undefined) {
+    this.buckets[index] = {};
+  }
+  this.buckets[index][key] = value;
+  console.log(this.buckets);
+};
+
+HashTable.prototype.get = function (key) {
+  var index = this.hash(key);
+  return this.buckets[index][key];
+};
+
+HashTable.prototype.hasKey = function (key) {
+  var index = this.hash(key);
+  return this.buckets[index].hasOwnProperty(key);
+};
 
 // No modifiquen nada debajo de esta linea
 // --------------------------------
